@@ -1,0 +1,87 @@
+rules_version = '2';
+
+// T08 — Regras de segurança do Firestore (Onda 1)
+//
+// Coleções:
+//   usuarios/{uid}                           (T01) perfil do aluno
+//   disciplinas/{id}                         (T04) somente leitura; escrita pelo script de carga (Admin SDK)
+//   topicos_avaliacao/{id}                   (T06) somente leitura
+//   disciplinas/{id}/avaliacoes/{uid}        (F03) uma avaliação por aluno por disciplina
+//
+// Edição (F12) e exclusão (F15) de avaliações são de ondas futuras, por isso update/delete ficam bloqueados.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function logado() {
+      return request.auth != null;
+    }
+
+    function ehODono(uid) {
+      return logado() && request.auth.uid == uid;
+    }
+
+    function notaValida(v) {
+      return v is int && v >= 1 && v <= 5;
+    }
+
+    // ---------- usuarios (T01) ----------
+    match /usuarios/{uid} {
+      allow read: if ehODono(uid);
+
+      allow create: if ehODono(uid)
+        && request.resource.data.keys().hasOnly(['nome', 'email', 'curso', 'semestre', 'criadoEm'])
+        && request.resource.data.nome is string
+        && request.resource.data.nome.size() >= 2
+        && request.resource.data.nome.size() <= 80
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.curso is string
+        && request.resource.data.curso.size() >= 2
+        && request.resource.data.semestre is int
+        && request.resource.data.semestre >= 1
+        && request.resource.data.semestre <= 12
+        && request.resource.data.criadoEm == request.time;
+
+      // Atualização do perfil é F07 (Onda 3).
+      allow update, delete: if false;
+    }
+
+    // ---------- disciplinas (T04) ----------
+    match /disciplinas/{disciplinaId} {
+      allow read: if true;
+      allow write: if false;
+
+      // ---------- avaliações (T06 / T08) ----------
+      match /avaliacoes/{uid} {
+        allow read: if true;
+
+        allow create: if ehODono(uid)
+          && request.resource.data.keys().hasOnly(['notas', 'criadoEm'])
+          && request.resource.data.criadoEm == request.time
+          && request.resource.data.notas is map
+          && request.resource.data.notas.keys().hasOnly(
+               ['dificuldade', 'carga_extraclasse', 'aplicacao_pratica', 'relevancia'])
+          && request.resource.data.notas.keys().hasAll(
+               ['dificuldade', 'carga_extraclasse', 'aplicacao_pratica', 'relevancia'])
+          && notaValida(request.resource.data.notas.dificuldade)
+          && notaValida(request.resource.data.notas.carga_extraclasse)
+          && notaValida(request.resource.data.notas.aplicacao_pratica)
+          && notaValida(request.resource.data.notas.relevancia)
+          && exists(/databases/$(database)/documents/usuarios/$(uid));
+
+        allow update, delete: if false;
+      }
+    }
+
+    // ---------- tópicos de avaliação (T06) ----------
+    match /topicos_avaliacao/{topicoId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Qualquer outra coleção fica fechada.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
