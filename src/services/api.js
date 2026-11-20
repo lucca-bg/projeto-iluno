@@ -14,4 +14,6 @@ export const buscarDisciplinas = (nome) =>
 
 export const obterDisciplina = (id) => get(`/api/disciplinas/${encodeURIComponent(id)}`);
 
+export const obterMedias = (id) => get(`/api/disciplinas/${encodeURIComponent(id)}/medias`);
+
 export const listarTopicos = () => get("/api/topicos");

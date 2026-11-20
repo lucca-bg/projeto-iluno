@@ -44,6 +44,10 @@ Os testes verificam criação válida e multilinha, leitura pública, rejeição
 4. Testar texto vazio, somente espaços e mais de 1000 caracteres; conferir limite e bloqueio de envio duplicado enquanto a requisição está em andamento.
 5. Com o simulador de regras do Firebase ou emulador, confirmar rejeição de criação anônima, UID/nome de outro usuário, data forjada, campos extras e disciplina inexistente; conferir que update/delete são negados.
 
+## Médias das avaliações
+
+A página de disciplina mostra a média aritmética das notas de cada tópico e o total de avaliações, consultando `GET /api/disciplinas/{id}/medias` (`api/medias.py`). A resposta tem o formato `{ "total": 3, "medias": { "dificuldade": 4.33, ... } }`; tópico sem notas vem com `null` e disciplina inexistente retorna 404. As médias são calculadas a cada requisição a partir de `disciplinas/{id}/avaliacoes` e são recarregadas logo após o aluno enviar a própria avaliação. Não há mudança nas regras do Firestore.
+
 ## Estrutura do Firestore
 
 ```

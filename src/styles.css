@@ -117,3 +117,11 @@ h2 { font-size: 1.1rem; margin: 20px 0 8px; }
 .comentarios-lista li { padding: 16px 0; border-top: 1px solid var(--borda); }
 .comentarios-lista time { color: var(--suave); font-size: 0.85rem; }
 .comentarios-lista li p { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.medias dl { display: grid; gap: 12px; margin: 0; }
+.media dt { font-weight: 600; font-size: 0.92rem; }
+.media dd { display: flex; align-items: center; gap: 10px; margin: 4px 0 0; }
+.media .barra { flex: 1; height: 8px; border-radius: 999px; background: var(--borda); overflow: hidden; }
+.media .barra span { display: block; height: 100%; background: var(--primaria); }
+.media strong { min-width: 2.2em; text-align: right; }
+.media small { color: var(--suave); margin-left: -6px; }
