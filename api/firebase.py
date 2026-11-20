@@ -32,6 +32,11 @@ def obter_disciplina(disciplina_id: str) -> dict | None:
     return {"id": doc.id, **doc.to_dict()} if doc.exists else None
 
 
+def listar_avaliacoes(disciplina_id: str) -> list[dict]:
+    docs = _db().collection("disciplinas").document(disciplina_id).collection("avaliacoes").stream()
+    return [d.to_dict() for d in docs]
+
+
 def listar_topicos() -> list[dict]:
     docs = _db().collection("topicos_avaliacao").order_by("ordem").stream()
     return [{"id": d.id, **d.to_dict()} for d in docs]

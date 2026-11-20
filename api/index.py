@@ -2,7 +2,8 @@
 
 T17 — inicialização da API e rota de saúde.
 T05 — busca de disciplina por nome.
-Também expõe o detalhe da disciplina e os tópicos de avaliação, usados pela tela do T07.
+Também expõe o detalhe da disciplina e os tópicos de avaliação, usados pela tela do T07,
+e as médias das notas de cada tópico por disciplina.
 
 Execução local:
     uvicorn api.index:app --reload --port 8000
@@ -17,6 +18,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from fastapi import FastAPI, HTTPException, Query  # noqa: E402
 
 from api.busca import filtrar_por_nome
+from api.medias import calcular_medias
 from api import firebase
 
 app = FastAPI(title="iLuno API", version="0.1.0")
@@ -44,6 +46,15 @@ def detalhar_disciplina(disciplina_id: str):
     if disciplina is None:
         raise HTTPException(status_code=404, detail="Disciplina não encontrada")
     return disciplina
+
+
+@app.get("/api/disciplinas/{disciplina_id}/medias")
+def medias_da_disciplina(disciplina_id: str):
+    """Média aritmética das notas de cada tópico e total de avaliações da disciplina."""
+    if firebase.obter_disciplina(disciplina_id) is None:
+        raise HTTPException(status_code=404, detail="Disciplina não encontrada")
+    topicos = [t["id"] for t in firebase.listar_topicos()]
+    return calcular_medias(firebase.listar_avaliacoes(disciplina_id), topicos)
 
 
 @app.get("/api/topicos")

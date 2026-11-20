@@ -6,6 +6,7 @@ import { useAuth } from "../AuthContext";
 import { listarTopicos, obterDisciplina } from "../services/api";
 import { enviarAvaliacao, obterMinhaAvaliacao } from "../services/avaliacoes";
 import Comentarios from "../components/Comentarios";
+import Medias from "../components/Medias";
 
 function Escala({ valor, onChange, rotulo }) {
   return (
@@ -103,6 +104,7 @@ export default function Disciplina() {
         </dl>
         <h2>Ementa</h2>
         <p>{disciplina.ementa}</p>
+        <Medias disciplinaId={id} topicos={topicos} atualizacao={jaAvaliou} />
       </article>
 
       <aside className="cartao">
